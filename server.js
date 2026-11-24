@@ -4,19 +4,21 @@ const cors = require("cors");
 const pool = require("./db");
 
 const app = express();
+app.set("trust proxy", 1);
 
 const origins = (process.env.CLIENT_ORIGINS || "")
   .split(",").map(value => value.trim()).filter(Boolean);
 app.use(cors({ origin: origins }));
 app.use(express.json());
 
-// ---- Edit these three lines ----
+// ---- Edit these lines ----
 const PROJECT_NAME = "Campus Maintenance Request System";
 const STUDENT_NAME = "Taonga Kaonga";
 const STUDENT_NUMBER = "202509194";
 const SYSTEM_DESCRIPTION =
-
-// --------------------------------
+  "Staff and students report faults around campus (electrical, plumbing, ICT and so on) " +
+  "and track each request from Pending to Completed.";
+// --------------------------
 
 app.get("/", (req, res) => {
   const base = `${req.protocol}://${req.get("host")}`;
@@ -24,31 +26,52 @@ app.get("/", (req, res) => {
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${PROJECT_NAME} API</title>
+<link rel="icon" href="data:,">
 <style>
- body{font-family:system-ui,sans-serif;max-width:860px;margin:2rem auto;padding:0 1rem;line-height:1.5;color:#1b1f24}
- table{border-collapse:collapse;width:100%;margin:.5rem 0 1.5rem}
- th,td{border:1px solid #d0d7de;padding:.4rem .6rem;text-align:left;vertical-align:top}
- th{background:#f1f4f8} pre{background:#f6f8fa;padding:.8rem;overflow:auto;border-radius:6px}
- code{background:#f6f8fa;padding:0 .25rem;border-radius:3px}
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Inter:wght@400;500&display=swap');
+:root{--brand:#0b5394;--brand-dark:#073763;--accent:#f4b400;--bg:#f4f7fb;--text:#1b1f24}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+header{background:linear-gradient(135deg,var(--brand-dark),var(--brand));color:#fff;padding:2.5rem 1rem;border-bottom:5px solid var(--accent)}
+header .wrap,main{max-width:900px;margin:0 auto;padding:0 1rem}
+header h1{font-family:'Poppins',sans-serif;font-size:2rem;margin:0 0 .3rem}
+header p{margin:.2rem 0;opacity:.9}
+main{padding-top:1.5rem;padding-bottom:3rem}
+h2{font-family:'Poppins',sans-serif;color:var(--brand-dark);border-left:5px solid var(--accent);padding-left:.6rem;margin-top:2rem}
+.card{background:#fff;border-radius:10px;padding:1rem 1.2rem;box-shadow:0 2px 8px rgba(0,0,0,.08);margin:1rem 0}
+table{border-collapse:collapse;width:100%;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);margin:.5rem 0 1.5rem}
+th,td{padding:.6rem .8rem;text-align:left;vertical-align:top;border-bottom:1px solid #e3e8ef}
+th{background:var(--brand);color:#fff;font-weight:500}
+tr:nth-child(even) td{background:#f8fafc}
+pre{background:#102a43;color:#e6edf5;padding:1rem;border-radius:8px;overflow:auto}
+code{background:#e8eef6;padding:.1rem .35rem;border-radius:4px}
+a{color:var(--brand)}
+.badge{display:inline-block;padding:.1rem .6rem;border-radius:999px;font-size:.8rem;font-weight:500;color:#fff}
+.get{background:#2e7d32}.post{background:#1565c0}.put{background:#ef6c00}.delete{background:#c62828}
 </style></head><body>
+<header><div class="wrap">
 <h1>${PROJECT_NAME} API</h1>
-<p><strong>Student number:</strong> ${STUDENT_NUMBER}<br>
-<strong>Course:</strong> ICT251 Activity 7 &ndash; Backend Development</p>
+<p>ICT251 Activity 7 &ndash; Backend Development</p>
+<p>${STUDENT_NAME} &middot; Student number: ${STUDENT_NUMBER}</p>
+</div></header>
+<main>
+<div class="card">
 <p>${SYSTEM_DESCRIPTION}</p>
 <p><strong>Live base URL:</strong> <a href="${base}">${base}</a><br>
 Quick links: <a href="/health">/health</a> &middot; <a href="/api/records">/api/records</a></p>
 <p><em>Note: if this service has been idle, the first request may take up to a minute while it starts.</em></p>
+</div>
 
 <h2>Routes</h2>
 <table>
 <tr><th>Method</th><th>Route</th><th>Purpose</th><th>Success</th></tr>
-<tr><td>GET</td><td>/</td><td>This API guide</td><td>200</td></tr>
-<tr><td>GET</td><td>/health</td><td>Check server and database</td><td>200 (503 if database down)</td></tr>
-<tr><td>GET</td><td>/api/records</td><td>Read all records</td><td>200</td></tr>
-<tr><td>GET</td><td>/api/records/:id</td><td>Read one record</td><td>200</td></tr>
-<tr><td>POST</td><td>/api/records</td><td>Create a record</td><td>201</td></tr>
-<tr><td>PUT</td><td>/api/records/:id</td><td>Update a record (all four fields)</td><td>200</td></tr>
-<tr><td>DELETE</td><td>/api/records/:id</td><td>Delete a record</td><td>200</td></tr>
+<tr><td><span class="badge get">GET</span></td><td>/</td><td>This API guide</td><td>200</td></tr>
+<tr><td><span class="badge get">GET</span></td><td>/health</td><td>Check server and database</td><td>200 (503 if database down)</td></tr>
+<tr><td><span class="badge get">GET</span></td><td>/api/records</td><td>Read all records</td><td>200</td></tr>
+<tr><td><span class="badge get">GET</span></td><td>/api/records/:id</td><td>Read one record</td><td>200</td></tr>
+<tr><td><span class="badge post">POST</span></td><td>/api/records</td><td>Create a record</td><td>201</td></tr>
+<tr><td><span class="badge put">PUT</span></td><td>/api/records/:id</td><td>Update a record (all four fields)</td><td>200</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td>/api/records/:id</td><td>Delete a record</td><td>200</td></tr>
 </table>
 
 <h2>Fields</h2>
@@ -81,6 +104,7 @@ Quick links: <a href="/health">/health</a> &middot; <a href="/api/records">/api/
 <tr><td>503</td><td>/health only: database not responding</td></tr>
 </table>
 <p>Errors are JSON, e.g. <code>{"message":"Title must have 3 to 80 characters."}</code></p>
+</main>
 </body></html>`);
 });
 
@@ -96,21 +120,18 @@ app.get("/health", async (req, res) => {
 
 app.use("/api/records", require("./routes/records"));
 
-// Unknown routes
+// Unknown routes -> JSON 404
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found." });
 });
 
-// Error handler (four parameters)
+// Error handler (must have 4 parameters)
 app.use((error, req, res, next) => {
   if (error.type === "entity.parse.failed" || error instanceof SyntaxError) {
     return res.status(400).json({ message: "Malformed JSON in request body." });
   }
   if (error.type === "entity.too.large") {
     return res.status(400).json({ message: "Request body is too large." });
-  }
-  if (error.message === "Not allowed by CORS") {
-    return res.status(403).json({ message: "Origin not allowed." });
   }
   console.error(error);
   res.status(500).json({ message: "Something went wrong on the server. Please try again." });
@@ -125,6 +146,6 @@ pool.initDb()
     });
   })
   .catch(error => {
-    console.error("Database setup failed:", error.message);
+    console.error("Database setup failed:", error.code, error.message, error.errors || "");
     process.exit(1);
   });
